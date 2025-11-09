@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ReceipController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 Route::resource('users', UserController::class);
+Route::resource('categories', CategoryController::class);
+Route::resource('receips', ReceipController::class);
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login');

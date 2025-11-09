@@ -48,7 +48,6 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'role' => 'user',
             ]);
-
             return response()->json([
                 'status' => true,
                 'new_user' => $new_user
@@ -90,6 +89,9 @@ class AuthController extends Controller
             ], 409);
         }
 
+        $old_token = RefreshToken::where('user_id', $user->id)->first();
+        if ($old_token) $old_token->delete();
+
         $payload = ['email' => $user->email, 'name' => $user->name, 'role' => $user->role];
 
         function getClaims(string $type, array $payload)
@@ -113,9 +115,6 @@ class AuthController extends Controller
             'user_id' => $user->id
         ]);
 
-        // $user->token_id = $token->id;
-        // $user->save();
-
         return response()->json([
             'status' => true,
             'access_token' => $access_token,
@@ -136,20 +135,17 @@ class AuthController extends Controller
             }
             $user = auth()->user();
 
-            $old_token = Token::where('id', $user->token_id)->first();
+            $old_token = RefreshToken::where('user_id', $user->id)->first();
             $new_accessToken = Auth::setTTL(60)->claims(['type' => 'access'], $payload)->fromUser(auth()->user());
             $new_refreshToken = Auth::setTTL(60 * 24 * 60)->claims(['type' => 'refresh'], $payload)->fromUser(auth()->user());
 
             $encrypted_refresh_token = Crypt::encrypt($new_refreshToken);
-
             $old_token->delete();
 
             $token = RefreshToken::create([
-                'refresh_token' => $encrypted_refresh_token
+                'refresh_token' => $encrypted_refresh_token,
+                'user_id' => $user->id
             ]);
-
-            $user->token_id = $token->id;
-            $user->save();
 
             return response()->json([
                 'access_token' => $new_accessToken,
