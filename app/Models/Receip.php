@@ -24,9 +24,9 @@ class Receip extends Model
     {
         return $this->hasMany(Stat::class);
     }
-    public function ingredients(): HasMany
+    public function ingredients()
     {
-        return $this->hasMany(Ingredient::class);
+        return $this->belongsToMany(Ingredient::class);
     }
     public function user(): BelongsTo
     {

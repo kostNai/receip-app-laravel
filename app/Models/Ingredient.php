@@ -3,14 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Ingredient extends Model
 {
-    protected $fillable = ['ingredient', 'receip_id'];
+    protected $fillable = ['ingredient'];
 
-    public function receip(): HasOne
+    public function receips()
     {
-        return $this->hasOne(Receip::class);
+        return $this->belongsToMany(Receip::class);
     }
 }

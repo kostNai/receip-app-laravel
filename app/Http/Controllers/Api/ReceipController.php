@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\AuthMiddleware;
 use App\Models\Category;
+use App\Models\Ingredient;
 use App\Models\Receip;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -44,12 +45,17 @@ class ReceipController extends Controller implements HasMiddleware
         $validator = Validator::make($request->all(), [
             'title' => 'required',
             'text' => 'required',
-            'category' => 'required'
+            'category' => 'required',
+            'ingredient_id' => 'required',
+            'ingredient_id.*' => 'exists:ingredients,id',
         ], [
             'title.required' => 'Введіть заголовок',
             'text.required' => 'Введіть опис',
             'category.required' => 'Оберіть категорію',
+            'ingredient_id.required' => 'Оберіть хоча б один інгредієнт',
+            'ingredient_id.*.exists' => 'Інгредієнт не знайдено, спочатку додайте його',
         ]);
+
 
         if ($validator->fails()) {
             return response()->json([
@@ -66,6 +72,12 @@ class ReceipController extends Controller implements HasMiddleware
                 'message' => 'Такої категорії не існує'
             ], 404);
         }
+        if (Receip::where('title', $request->title)->first()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Рецепт з такой назвою вже існує '
+            ], 500);
+        }
 
         try {
             $new_receip = Receip::create([
@@ -76,6 +88,9 @@ class ReceipController extends Controller implements HasMiddleware
                 'category_id' => $category->id,
             ]);
 
+            foreach ($request->ingredients as $key => $value) {
+                $new_receip->ingredients()->attach($value);
+            }
             return response()->json([
                 'status' => true,
                 'new_receip' => $new_receip
@@ -84,7 +99,7 @@ class ReceipController extends Controller implements HasMiddleware
             return response()->json([
                 'status' => false,
                 'message' => $e->getMessage()
-            ], $e->getCode());
+            ], 500);
         }
     }
 
