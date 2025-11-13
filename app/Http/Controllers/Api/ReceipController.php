@@ -43,18 +43,22 @@ class ReceipController extends Controller implements HasMiddleware
         $user = JWTAuth::parseToken()->authenticate();
 
         $validator = Validator::make($request->all(), [
-            'title' => 'required',
-            'text' => 'required',
-            'category' => 'required',
-            'ingredient_id' => 'required',
-            'ingredient_id.*' => 'exists:ingredients,id',
+            'title' => 'required|string',
+            'text' => 'required|string',
+            'category' => 'required|string',
+            'ingredients' => 'required|array|min:1',
+            'ingredients.*.id' => 'required|exists:ingredients,id',
+            'ingredients.*.value' => 'required|string',
         ], [
             'title.required' => 'Введіть заголовок',
             'text.required' => 'Введіть опис',
             'category.required' => 'Оберіть категорію',
-            'ingredient_id.required' => 'Оберіть хоча б один інгредієнт',
-            'ingredient_id.*.exists' => 'Інгредієнт не знайдено, спочатку додайте його',
+            'ingredients.required' => 'Оберіть хоча б один інгредієнт',
+            'ingredients.*.id.required' => 'ID інгредієнта обовʼязковий',
+            'ingredients.*.id.exists' => 'Інгредієнт не знайдено, спочатку додайте його',
+            'ingredients.*.value.required' => 'Вкажіть кількість або значення інгредієнта',
         ]);
+
 
 
         if ($validator->fails()) {
@@ -88,9 +92,12 @@ class ReceipController extends Controller implements HasMiddleware
                 'category_id' => $category->id,
             ]);
 
-            foreach ($request->ingredients as $key => $value) {
-                $new_receip->ingredients()->attach($value);
+            foreach ($request->ingredients as $ingredient) {
+                $new_receip->ingredients()->attach($ingredient['id'], [
+                    'ingredients_value' => $ingredient['value']
+                ]);
             }
+
             return response()->json([
                 'status' => true,
                 'new_receip' => $new_receip

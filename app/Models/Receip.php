@@ -24,10 +24,7 @@ class Receip extends Model
     {
         return $this->hasMany(Stat::class);
     }
-    public function ingredients()
-    {
-        return $this->belongsToMany(Ingredient::class);
-    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -35,5 +32,11 @@ class Receip extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+    public function ingredients()
+    {
+        return $this->belongsToMany(Ingredient::class)
+            ->withPivot('ingredients_value')
+            ->withTimestamps();
     }
 }
