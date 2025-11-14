@@ -101,7 +101,7 @@ class StatController extends Controller
         }
 
         try {
-            $stat::update($request->all(), [
+            $stat->update($request->all(), [
                 'prep_time',
                 'cooking_time',
                 'yields',
@@ -131,7 +131,7 @@ class StatController extends Controller
         }
 
         try {
-            $stat::delete();
+            $stat->delete();
 
             return response()->json([
                 'status' => true,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ReceipController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\IngredientController;
 use App\Http\Controllers\Api\StatController;
+use App\Http\Controllers\Api\StepController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,7 @@ Route::resource('categories', CategoryController::class);
 Route::resource('receips', ReceipController::class);
 Route::resource('ingredients', IngredientController::class);
 Route::resource('stats', StatController::class);
+Route::resource('steps', StepController::class);
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login');
